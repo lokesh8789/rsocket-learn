@@ -1,30 +1,29 @@
-package com.lokesh;
+package com.lokesh.client;
 
 import com.lokesh.dto.RequestDto;
 import com.lokesh.util.ObjectUtil;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
+import io.rsocket.SocketAcceptor;
 import io.rsocket.core.RSocketConnector;
 import io.rsocket.transport.netty.client.TcpClientTransport;
-import io.rsocket.util.DefaultPayload;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
-import java.io.Flushable;
 import java.time.Duration;
 
 public class Client {
 
     public static void main(String[] args) throws InterruptedException {
         RSocket rSocket = RSocketConnector.create()
+                .acceptor(SocketAcceptor.with(new PeerToPeerClient()))
                 .connect(TcpClientTransport.create("localhost", 6565))
                 .block();
         
         assert rSocket != null;
-//        fireAndForget(rSocket);
+        fireAndForget(rSocket);
 //        requestResponse(rSocket);
 //        requestStream(rSocket);
-        requestChannel(rSocket);
+//        requestChannel(rSocket);
     }
 
     private static void requestChannel(RSocket rSocket) throws InterruptedException {
@@ -61,7 +60,7 @@ public class Client {
         rSocket.fireAndForget(ObjectUtil.toPayload(new RequestDto(22)))
                 .subscribe();
 
-        rSocket.fireAndForget(ObjectUtil.toPayload(new RequestDto(23))).subscribe();
+//        rSocket.fireAndForget(ObjectUtil.toPayload(new RequestDto(23))).subscribe();
         Thread.sleep(5000);
     }
 }
