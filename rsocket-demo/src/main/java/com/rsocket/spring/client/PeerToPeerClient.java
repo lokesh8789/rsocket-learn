@@ -26,6 +26,6 @@ public class PeerToPeerClient implements CommandLineRunner {
     }
     @Override
     public void run(String... args) throws Exception {
-        request();
+//        request();
     }
 }

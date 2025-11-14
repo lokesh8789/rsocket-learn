@@ -32,7 +32,7 @@ public class Client implements CommandLineRunner {
     public void run(String... args) throws Exception {
         log.info("Starting Guessing Game");
         Thread.sleep(3000);
-        guess();
+//        guess();
     }
 
 }

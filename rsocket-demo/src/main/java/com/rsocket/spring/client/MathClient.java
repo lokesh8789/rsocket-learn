@@ -15,6 +15,7 @@ public class MathClient implements CommandLineRunner {
     private final RSocketRequester rSocketRequester;
     public MathClient(RSocketRequester.Builder builder) {
         this.rSocketRequester = builder
+                .setupRoute("connect.route") // connecting to specific @ConnectMapping
                 .tcp("localhost", 6565);
     }
 
@@ -58,7 +59,7 @@ public class MathClient implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Thread.sleep(5_000);
+        Thread.sleep(3_000);
         log.info("MathClient start");
 //        number();
 //        square();
