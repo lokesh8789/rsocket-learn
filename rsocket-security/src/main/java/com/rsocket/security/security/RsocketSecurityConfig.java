@@ -1,10 +1,12 @@
 package com.rsocket.security.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.rsocket.messaging.RSocketStrategiesCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.rsocket.EnableRSocketSecurity;
 import org.springframework.security.config.annotation.rsocket.RSocketSecurity;
@@ -14,6 +16,7 @@ import org.springframework.security.messaging.handler.invocation.reactive.Authen
 import org.springframework.security.rsocket.core.PayloadSocketAcceptorInterceptor;
 import org.springframework.security.rsocket.metadata.SimpleAuthenticationEncoder;
 
+@Slf4j
 @Configuration
 @EnableRSocketSecurity
 public class RsocketSecurityConfig {
@@ -37,11 +40,12 @@ public class RsocketSecurityConfig {
     }
 
     @Bean
-    public PayloadSocketAcceptorInterceptor  socketAcceptorInterceptor(RSocketSecurity security) {
+    public PayloadSocketAcceptorInterceptor socketAcceptorInterceptor(RSocketSecurity security) {
         return security
                 .simpleAuthentication(Customizer.withDefaults())
                 .authorizePayload(auth -> auth
                         .route("math.cube").permitAll()
+                        .route("math.login").permitAll()
                         .setup().permitAll()
                         .anyRequest().authenticated()
                 )

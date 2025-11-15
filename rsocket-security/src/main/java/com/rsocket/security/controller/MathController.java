@@ -1,10 +1,14 @@
 package com.rsocket.security.controller;
 
 
+import com.rsocket.security.dto.LoginRequest;
+import com.rsocket.security.repo.UserRepository;
+import com.rsocket.security.security.JwtTokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
 
@@ -12,6 +16,25 @@ import reactor.core.publisher.Mono;
 @Controller
 @MessageMapping("math")
 public class MathController {
+
+    private final UserRepository userRepository;
+    private final JwtTokenUtil jwtTokenUtil;
+    private final PasswordEncoder passwordEncoder;
+
+    public MathController(UserRepository userRepository, JwtTokenUtil jwtTokenUtil, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.jwtTokenUtil = jwtTokenUtil;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @MessageMapping("login")
+    public Mono<String> login(Mono<LoginRequest> requestMono) {
+        return requestMono.doOnNext(r -> log.info("Login Request: {}", r))
+                .flatMap(r -> Mono.fromSupplier(() -> userRepository.loadUserByUsername(r.username()))
+                        .filter(ud -> passwordEncoder.matches(r.password(), ud.getPassword())))
+                .map(ud -> jwtTokenUtil.generateToken(ud.getUsername()))
+                .doOnNext(s -> log.info("Generated Token: {}", s));
+    }
 
     @MessageMapping("square")
     public Mono<Integer> square(@AuthenticationPrincipal UserDetails userDetails, Mono<Integer> requestMono) {
