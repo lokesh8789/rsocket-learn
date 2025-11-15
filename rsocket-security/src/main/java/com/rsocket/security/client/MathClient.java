@@ -11,6 +11,8 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @Slf4j
 @Component
 public class MathClient implements CommandLineRunner {
@@ -42,6 +44,7 @@ public class MathClient implements CommandLineRunner {
         UsernamePasswordMetadata usernamePasswordMetadata = new UsernamePasswordMetadata("", token);
         rSocketRequester.route("math.square")
                 .metadata(usernamePasswordMetadata, mimeType)
+                .metadata(UUID.randomUUID(), MimeTypeUtils.parseMimeType(WellKnownMimeType.APPLICATION_CBOR.getString())) // Custom MetaData To be Extracted via @Header(".....")
                 .data(5)
                 .retrieveMono(Integer.class)
                 .doOnNext(response -> log.info("Square Response: {}", response))

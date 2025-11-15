@@ -1,5 +1,6 @@
 package com.rsocket.security.security;
 
+import io.rsocket.metadata.WellKnownMimeType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.rsocket.messaging.RSocketStrategiesCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.messaging.handler.invocation.reactive.AuthenticationPrincipalArgumentResolver;
 import org.springframework.security.rsocket.core.PayloadSocketAcceptorInterceptor;
 import org.springframework.security.rsocket.metadata.SimpleAuthenticationEncoder;
+import org.springframework.util.MimeTypeUtils;
+
+import java.util.UUID;
 
 @Slf4j
 @Configuration
@@ -28,7 +32,9 @@ public class RsocketSecurityConfig {
 
     @Bean
     public RSocketStrategiesCustomizer customizer() {
-        return strategies -> strategies.encoder(new SimpleAuthenticationEncoder());
+        return strategies -> strategies.encoder(new SimpleAuthenticationEncoder())
+                .metadataExtractorRegistry(registry ->
+                        registry.metadataToExtract(MimeTypeUtils.parseMimeType(WellKnownMimeType.APPLICATION_CBOR.getString()), UUID.class, "request-id"));
     }
 
     @Bean
